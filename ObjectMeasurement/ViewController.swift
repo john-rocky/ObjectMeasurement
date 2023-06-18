@@ -242,29 +242,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
 
             BRNode.worldPosition = sceneView.unprojectPoint(screenPos)
 
-
-//            guard let topLeftCoordinate = frame.camera.unprojectPoint(deNormalizedTopLeft, ontoPlane: simd_float4x4 (columns:( simd_float4(1,1,-distanceToSurface, 1), simd_float4(1,1,-distanceToSurface, 1), simd_float4(1,1,-distanceToSurface, 1), simd_float4(1,1,-distanceToSurface, 1))), orientation: UIInterfaceOrientation.portrait, viewportSize: view.bounds.size),
-//            let topRightCoordinate = frame.camera.unprojectPoint(deNormalizedTopRight, ontoPlane: simd_float4x4 (columns:( simd_float4(1,1,-distanceToSurface, 1), simd_float4(1,1,-distanceToSurface, 1), simd_float4(1,1,-distanceToSurface, 1), simd_float4(1,1,-distanceToSurface, 1))), orientation: UIInterfaceOrientation.portrait, viewportSize: view.bounds.size),
-//            let bottomLeftCoordinate = frame.camera.unprojectPoint(deNormalizedBottomLeft, ontoPlane:simd_float4x4 (columns:( simd_float4(1,1,-distanceToSurface, 1), simd_float4(1,1,-distanceToSurface, 1), simd_float4(1,1,-distanceToSurface, 1), simd_float4(1,1,-distanceToSurface, 1))), orientation: UIInterfaceOrientation.portrait, viewportSize: view.bounds.size),
-//                  let bottomRightCoordinate = frame.camera.unprojectPoint(deNormalizedBottomRight, ontoPlane: simd_float4x4 (columns:( simd_float4(1,1,-distanceToSurface, 1), simd_float4(1,1,-distanceToSurface, 1), simd_float4(1,1,-distanceToSurface, 1), simd_float4(1,1,-distanceToSurface, 1))), orientation: UIInterfaceOrientation.portrait, viewportSize: view.bounds.size) else { return }
-//
-//            print(surfaceCenter)
-//            print(topLeftCoordinate)
-            // 平面座標を3D座標に変換
-//            if let topLeftCoordinate = getTapCoordinateOnPlaneNode(tapPoint: deNormalizedTopLeft) {
-//                print(topLeftCoordinate)
-//                TLNode.simdWorldPosition = topLeftCoordinate
-//            }
-//            if let topRightCoordinate = getTapCoordinateOnPlaneNode(tapPoint: deNormalizedTopRight) {
-//                TRNode.simdWorldPosition = topRightCoordinate
-//            }
-//            if let bottomLeftCoordinate = getTapCoordinateOnPlaneNode(tapPoint: deNormalizedBottomLeft) {
-//                BLNode.simdWorldPosition = bottomLeftCoordinate
-//            }
-//            if let bottomRightCoordinate = getTapCoordinateOnPlaneNode(tapPoint: deNormalizedBottomRight) {
-//                BRNode.simdWorldPosition = bottomRightCoordinate
-//            }
-//
             let leftCenterCoordinate = SIMD3(x: (BLNode.simdWorldPosition.x+TLNode.simdWorldPosition.x)/2, y: (BLNode.simdWorldPosition.y+TLNode.simdWorldPosition.y)/2, z: (BLNode.simdWorldPosition.z+TLNode.simdWorldPosition.z)/2)
 
             let rightCenterCoordinate = SIMD3(x: (BRNode.simdWorldPosition.x+TRNode.simdWorldPosition.x)/2, y: (BRNode.simdWorldPosition.y+TRNode.simdWorldPosition.y)/2, z: (BRNode.simdWorldPosition.z+TRNode.simdWorldPosition.z)/2)
