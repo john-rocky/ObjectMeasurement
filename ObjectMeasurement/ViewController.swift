@@ -117,7 +117,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         sceneView.session.delegate = self
         UIApplication.shared.isIdleTimerDisabled = true
         
-        sceneView.showsStatistics = true
         view.addSubview(distanceFromDeviceLabel)
         distanceFromDeviceLabel.frame = CGRect(x: 0, y: view.bounds.maxY - 200, width: view.bounds.width, height: 200)
         distanceFromDeviceLabel.textAlignment = .center
@@ -125,7 +124,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         
         view.addSubview(widthLabel)
         view.addSubview(heightLabel)
-        view.addSubview(classLabel)
+        sceneView.addSubview(classLabel)
         widthLabel.textAlignment = .center
         heightLabel.textAlignment = .center
         classLabel.textAlignment = .center
@@ -167,7 +166,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         }
 
         var cropped:CIImage
-        if UIDevice.current.orientation.isPortrait {
+        if self.view.window!.windowScene!.interfaceOrientation.rawValue == 1 {
+
             let aspect =  frameRect!.width / frameRect!.height
             let estimateWidth = ciImage.extent.height * aspect
             
@@ -178,6 +178,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
                 height: ciImage.extent.height)
             )
         } else {
+            ciImage = ciImage.oriented(.left)
+
             let aspect =  frameRect!.height / frameRect!.width
             let estimateHeight = ciImage.extent.width * aspect
             cropped = ciImage.cropped(to: CGRect(
@@ -372,6 +374,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     // MARK: - ARSessionDelegate
 
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
+        print(self.view.window?.windowScene!.interfaceOrientation.rawValue)
+
         let hitTestResults = sceneView.hitTest(sceneView.center,types:[.existingPlaneUsingGeometry])
         guard let result = hitTestResults.first else { return }
 
