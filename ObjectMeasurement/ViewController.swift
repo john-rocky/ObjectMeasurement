@@ -11,7 +11,7 @@ import ARKit
 import Vision
 
 
-class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
+class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, ARCoachingOverlayViewDelegate {
     // MARK: - IBOutlets
 
     @IBOutlet weak var sessionInfoView: UIView!
@@ -20,7 +20,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     var widthLabel = UILabel()
     var heightLabel = UILabel()
     var classLabel = UILabel()
-    
+    let coachingOverlay = ARCoachingOverlayView()
+
     var yoloRequest: VNCoreMLRequest!
     private var frameRect: CGRect?
     let ciContext = CIContext()
@@ -101,6 +102,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     }()
     
     var hitObjectDistanceFromCamera:Float?
+    
+    var plane:SCNNode?
 
 
     // MARK: - View Life Cycle
@@ -108,6 +111,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     /// - Tag: StartARSession
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+
         setupModel()
         setupAR()
         let configuration = ARWorldTrackingConfiguration()
@@ -116,8 +120,15 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
 
         sceneView.session.delegate = self
         UIApplication.shared.isIdleTimerDisabled = true
-        
-        view.addSubview(distanceFromDeviceLabel)
+        coachingOverlay.goal = .verticalPlane
+        coachingOverlay.activatesAutomatically = true
+        coachingOverlay.session = sceneView.session
+        coachingOverlay.delegate = self
+
+        // Viewとして扱う
+        coachingOverlay.frame = sceneView.bounds
+        sceneView.addSubview(coachingOverlay)
+//        view.addSubview(distanceFromDeviceLabel)
         distanceFromDeviceLabel.frame = CGRect(x: 0, y: view.bounds.maxY - 200, width: view.bounds.width, height: 200)
         distanceFromDeviceLabel.textAlignment = .center
         distanceFromDeviceLabel.text = "distance"
@@ -159,6 +170,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     }
     
     func detectObject(pixelBuffer:CVPixelBuffer, frame:ARFrame) {
+        guard let yoloRequest = yoloRequest else {return}
         frameRect = sceneView.bounds
         var ciImage = CIImage(cvPixelBuffer: pixelBuffer, options: [:])
         if UIDevice.current.orientation.isPortrait {
@@ -195,9 +207,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
             try handler.perform([yoloRequest])
 //            guard let results = yoloRequest.results else { return }
             guard let result = yoloRequest.results?.first as? VNRecognizedObjectObservation else {
-                DispatchQueue.main.async {
-                    self.classLabel.isHidden = true
-                }
+                hideResult()
                 return
             }
             let topLeft = CGPoint(x: result.boundingBox.minX, y: 1 - result.boundingBox.maxY)
@@ -286,18 +296,19 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
 
             self.LRLineNode = LRLineNode
             self.TBLineNode = TBLineNode
-
+            showResult()
             DispatchQueue.main.async {
-                self.classLabel.isHidden = false
+//                self.classLabel.isHidden = false
                 self.classLabel.frame = CGRect(x: deNormalizedTopLeft.x, y: deNormalizedTopLeft.y, width: deNormalizedTopRight.x-deNormalizedTopLeft.x, height: deNormalizedBottomLeft.y-deNormalizedTopLeft.y)
                 self.classLabel.text = "\(result.labels.first!.identifier)\nw: \(LRcmDistance) cm\nh: \(TBcmDistance) cm"
             }
 
             print("")
         } catch let error {
-            DispatchQueue.main.async {
-                self.classLabel.isHidden = true
-            }
+            hideResult()
+//            DispatchQueue.main.async {
+//                self.classLabel.isHidden = true
+//            }
             print(error)
         }
     }
@@ -316,12 +327,12 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
             bgNode.isHidden = true
             return
         }
-        bgNode.isHidden = false
+        bgNode.isHidden = true
         let position = SCNVector3(x: 0, y: 0, z: hitObjectDistanceFromCamera) // ノードの位置は、左右：0m 上下：0m　奥に50cm
         if let camera = sceneView.pointOfView {
             bgNode.position = camera.convertPosition(position, to: nil) // カメラ位置からの偏差で求めた位置
             bgNode.eulerAngles = camera.eulerAngles  // カメラのオイラー角と同じにする
-            print(bgNode.simdTransform)
+//            print(bgNode.simdTransform)
         }
 
     }
@@ -332,7 +343,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         guard let planeAnchor = anchor as? ARPlaneAnchor else { return }
         
         // Create a custom object to visualize the plane geometry and extent.
-        let plane = Plane(anchor: planeAnchor, in: sceneView)
+//        let plane = Plane(anchor: planeAnchor, in: sceneView)
         
         // Add the visualization to the ARKit-managed node so that it tracks
         // changes in the plane anchor as plane estimation continues.
@@ -342,48 +353,57 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     /// - Tag: UpdateARContent
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
         // Update only anchors and nodes set up by `renderer(_:didAdd:for:)`.
-        guard let planeAnchor = anchor as? ARPlaneAnchor,
-            let plane = node.childNodes.first as? Plane
-            else { return }
-        
-        // Update ARSCNPlaneGeometry to the anchor's new estimated shape.
-        if let planeGeometry = plane.meshNode.geometry as? ARSCNPlaneGeometry {
-            planeGeometry.update(from: planeAnchor.geometry)
-        }
-
-        // Update extent visualization to the anchor's new bounding rectangle.
-        if let extentGeometry = plane.extentNode.geometry as? SCNPlane {
-            extentGeometry.width = CGFloat(planeAnchor.extent.x)
-            extentGeometry.height = CGFloat(planeAnchor.extent.z)
-            plane.extentNode.simdPosition = planeAnchor.center
-        }
-        
-        // Update the plane's classification and the text position
-        if #available(iOS 12.0, *),
-            let classificationNode = plane.classificationNode,
-            let classificationGeometry = classificationNode.geometry as? SCNText {
-            let currentClassification = planeAnchor.classification.description
-            if let oldClassification = classificationGeometry.string as? String, oldClassification != currentClassification {
-                classificationGeometry.string = currentClassification
-                classificationNode.centerAlign()
-            }
-        }
-        
+//        guard let planeAnchor = anchor as? ARPlaneAnchor,
+//            let plane = node.childNodes.first as? Plane
+//            else { return }
+//        
+//        // Update ARSCNPlaneGeometry to the anchor's new estimated shape.
+//        if let planeGeometry = plane.meshNode.geometry as? ARSCNPlaneGeometry {
+//            planeGeometry.update(from: planeAnchor.geometry)
+//        }
+//
+//        // Update extent visualization to the anchor's new bounding rectangle.
+//        if let extentGeometry = plane.extentNode.geometry as? SCNPlane {
+//            extentGeometry.width = CGFloat(planeAnchor.extent.x)
+//            extentGeometry.height = CGFloat(planeAnchor.extent.z)
+//            plane.extentNode.simdPosition = planeAnchor.center
+//        }
+//        
+//        // Update the plane's classification and the text position
+//        if #available(iOS 12.0, *),
+//            let classificationNode = plane.classificationNode,
+//            let classificationGeometry = classificationNode.geometry as? SCNText {
+//            let currentClassification = planeAnchor.classification.description
+//            if let oldClassification = classificationGeometry.string as? String, oldClassification != currentClassification {
+//                classificationGeometry.string = currentClassification
+//                classificationNode.centerAlign()
+//            }
+//        }
+//        
     }
 
+    
+    
     // MARK: - ARSessionDelegate
 
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
-        print(self.view.window?.windowScene!.interfaceOrientation.rawValue)
+//        print(self.view.window?.windowScene!.interfaceOrientation.rawValue)
 
-        let hitTestResults = sceneView.hitTest(sceneView.center,types:[.existingPlaneUsingGeometry])
-        guard let result = hitTestResults.first else { return }
-
-        let cameraPosition = frame.camera.transform.columns.3
-        let devicePosition = simd_float3(x: cameraPosition.x, y: cameraPosition.y, z: cameraPosition.z)
-        let hitCoordinates = simd_float3(x: result.worldTransform.columns.3.x, y: result.worldTransform.columns.3.y, z: result.worldTransform.columns.3.z)
-        let distance = distance(devicePosition, hitCoordinates)
-        distanceFromDeviceLabel.text = "\(distance)"
+//        let hitTestResults = sceneView.hitTest(sceneView.center,types:[.existingPlaneUsingGeometry])
+//        guard let result = hitTestResults.first else {
+//            hideResult()
+//            //            DispatchQueue.main.async {
+////                self.classLabel.isHidden = true
+////            }
+//            return
+//        }
+//
+//        let cameraPosition = frame.camera.transform.columns.3
+//        let devicePosition = simd_float3(x: cameraPosition.x, y: cameraPosition.y, z: cameraPosition.z)
+//        let hitCoordinates = simd_float3(x: result.worldTransform.columns.3.x, y: result.worldTransform.columns.3.y, z: result.worldTransform.columns.3.z)
+//        let distance = distance(devicePosition, hitCoordinates)
+//        distanceFromDeviceLabel.text = "\(distance)"
+//
         
         let pixelBuffer = frame.capturedImage
         detectObject(pixelBuffer: pixelBuffer,frame: frame)
@@ -402,7 +422,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
 
             // 平面の姿勢行列を組み立てる
             let planeTransform = simd_mul(simd_float4x4(translation: translation), rotation)
-            print(planeTransform)
+//            print(planeTransform)
             // planeTransformを使用して必要な処理を行う
             // ...
         
@@ -503,7 +523,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
     }
     
     func drawRectsOnImage(_ detections: [Detection], _ ciImage: CIImage) -> UIImage? {
-//        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
         let cgImage = ciContext.createCGImage(ciImage, from: ciImage.extent)!
         let size = ciImage.extent.size
         guard let cgContext = CGContext(data: nil,
@@ -547,9 +566,38 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate {
         }
         guard let newImage = cgContext.makeImage() else { return nil }
         return UIImage(ciImage: CIImage(cgImage: newImage))
-
     }
 
+    func showResult() {
+        TRNode.isHidden = false
+        TLNode.isHidden = false
+        BRNode.isHidden = false
+        BLNode.isHidden = false
+        LCNode.isHidden = false
+        RCNode.isHidden = false
+        TCNode.isHidden = false
+        BCNode.isHidden = false
+        LRLineNode?.isHidden = false
+        TBLineNode?.isHidden = false
+        DispatchQueue.main.async {
+            self.classLabel.isHidden = false
+        }
+    }
+    func hideResult() {
+        TRNode.isHidden = true
+        TLNode.isHidden = true
+        BRNode.isHidden = true
+        BLNode.isHidden = true
+        LCNode.isHidden = true
+        RCNode.isHidden = true
+        TCNode.isHidden = true
+        BCNode.isHidden = true
+        LRLineNode?.isHidden = true
+        TBLineNode?.isHidden = true
+        DispatchQueue.main.async {
+            self.classLabel.isHidden = true
+        }
+    }
 }
 
 extension CGPoint {
