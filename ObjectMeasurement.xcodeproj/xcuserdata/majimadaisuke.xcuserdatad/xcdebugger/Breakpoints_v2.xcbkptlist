@@ -157,8 +157,8 @@
             filePath = "ObjectMeasurement/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "409"
-            endingLineNumber = "409"
+            startingLineNumber = "423"
+            endingLineNumber = "423"
             landmarkName = "session(_:didUpdate:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -337,6 +337,54 @@
             endingLineNumber = "398"
             landmarkName = "session(_:didUpdate:)"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "44461708-C442-493F-912E-63075549F006"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ObjectMeasurement/ViewController.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "419"
+            endingLineNumber = "419"
+            landmarkName = "session(_:didUpdate:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "44461708-C442-493F-912E-63075549F006 - b04c9c05a5ea0e7c"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 @Swift.MainActor () -&gt; () in ObjectMeasurement.ViewController.session(_: __C.ARSession, didUpdate: __C.ARFrame) -&gt; ()"
+                  moduleName = "ObjectMeasurement"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/majimadaisuke/Downloads/ObjectMeasurement/ObjectMeasurement/ViewController.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "418"
+                  endingLineNumber = "418"
+                  offsetFromSymbolStart = "84">
+               </Location>
+               <Location
+                  uuid = "44461708-C442-493F-912E-63075549F006 - b04c9c05a5ea099d"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 @Swift.MainActor () -&gt; () in ObjectMeasurement.ViewController.session(_: __C.ARSession, didUpdate: __C.ARFrame) -&gt; ()"
+                  moduleName = "ObjectMeasurement"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/majimadaisuke/Downloads/ObjectMeasurement/ObjectMeasurement/ViewController.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "419"
+                  endingLineNumber = "419"
+                  offsetFromSymbolStart = "160">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

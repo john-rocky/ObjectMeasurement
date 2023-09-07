@@ -112,7 +112,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        setupModel()
+//        setupModel()
         setupAR()
         let configuration = ARWorldTrackingConfiguration()
         configuration.planeDetection = [.vertical]
@@ -128,7 +128,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
         // Viewとして扱う
         coachingOverlay.frame = sceneView.bounds
         sceneView.addSubview(coachingOverlay)
-//        view.addSubview(distanceFromDeviceLabel)
+        view.addSubview(distanceFromDeviceLabel)
         distanceFromDeviceLabel.frame = CGRect(x: 0, y: view.bounds.maxY - 200, width: view.bounds.width, height: 200)
         distanceFromDeviceLabel.textAlignment = .center
         distanceFromDeviceLabel.text = "distance"
@@ -406,7 +406,21 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
 //
         
         let pixelBuffer = frame.capturedImage
-        detectObject(pixelBuffer: pixelBuffer,frame: frame)
+        guard let surfaceCenter = getPointOnSurface(cgPoint: view.center) else {
+            hitObjectDistanceFromCamera = nil
+            return
+        }
+        let transform = frame.camera.transform.columns.3
+        let devicePosition = simd_float3(x: transform.x, y: transform.y, z: transform.z)
+        let distanceToSurface = distance(devicePosition,surfaceCenter)
+        hitObjectDistanceFromCamera = -distanceToSurface
+        DispatchQueue.main.async {
+            self.distanceFromDeviceLabel.isHidden = false
+            self.distanceFromDeviceLabel.text = String(distanceToSurface)
+        }
+        
+
+//        detectObject(pixelBuffer: pixelBuffer,frame: frame)
         let camera = frame.camera
             let screenPosition = CGPoint(x: 0.5, y: 0.5) // 画面中央の位置（正規化座標系）
             let cameraTransform = camera.transform
