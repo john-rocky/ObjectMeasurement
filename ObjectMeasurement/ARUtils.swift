@@ -24,11 +24,6 @@ extension ViewController {
         baseNode.addChildNode(TCNode)
         baseNode.addChildNode(bgNode)
 
-//        TLNode.isHidden = true
-//        TRNode.isHidden = true
-//        BLNode.isHidden = true
-//        BRNode.isHidden = true
-
     }
     
     

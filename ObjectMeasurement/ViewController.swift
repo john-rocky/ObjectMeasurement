@@ -352,34 +352,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
 
     /// - Tag: UpdateARContent
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
-        // Update only anchors and nodes set up by `renderer(_:didAdd:for:)`.
-//        guard let planeAnchor = anchor as? ARPlaneAnchor,
-//            let plane = node.childNodes.first as? Plane
-//            else { return }
-//        
-//        // Update ARSCNPlaneGeometry to the anchor's new estimated shape.
-//        if let planeGeometry = plane.meshNode.geometry as? ARSCNPlaneGeometry {
-//            planeGeometry.update(from: planeAnchor.geometry)
-//        }
-//
-//        // Update extent visualization to the anchor's new bounding rectangle.
-//        if let extentGeometry = plane.extentNode.geometry as? SCNPlane {
-//            extentGeometry.width = CGFloat(planeAnchor.extent.x)
-//            extentGeometry.height = CGFloat(planeAnchor.extent.z)
-//            plane.extentNode.simdPosition = planeAnchor.center
-//        }
-//        
-//        // Update the plane's classification and the text position
-//        if #available(iOS 12.0, *),
-//            let classificationNode = plane.classificationNode,
-//            let classificationGeometry = classificationNode.geometry as? SCNText {
-//            let currentClassification = planeAnchor.classification.description
-//            if let oldClassification = classificationGeometry.string as? String, oldClassification != currentClassification {
-//                classificationGeometry.string = currentClassification
-//                classificationNode.centerAlign()
-//            }
-//        }
-//        
     }
 
     
@@ -387,23 +359,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
     // MARK: - ARSessionDelegate
 
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
-//        print(self.view.window?.windowScene!.interfaceOrientation.rawValue)
-
-//        let hitTestResults = sceneView.hitTest(sceneView.center,types:[.existingPlaneUsingGeometry])
-//        guard let result = hitTestResults.first else {
-//            hideResult()
-//            //            DispatchQueue.main.async {
-////                self.classLabel.isHidden = true
-////            }
-//            return
-//        }
-//
-//        let cameraPosition = frame.camera.transform.columns.3
-//        let devicePosition = simd_float3(x: cameraPosition.x, y: cameraPosition.y, z: cameraPosition.z)
-//        let hitCoordinates = simd_float3(x: result.worldTransform.columns.3.x, y: result.worldTransform.columns.3.y, z: result.worldTransform.columns.3.z)
-//        let distance = distance(devicePosition, hitCoordinates)
-//        distanceFromDeviceLabel.text = "\(distance)"
-//
         
         let pixelBuffer = frame.capturedImage
         guard let surfaceCenter = getPointOnSurface(cgPoint: view.center) else {
@@ -418,29 +373,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
             self.distanceFromDeviceLabel.isHidden = false
             self.distanceFromDeviceLabel.text = String(distanceToSurface)
         }
-        
-
-//        detectObject(pixelBuffer: pixelBuffer,frame: frame)
-        let camera = frame.camera
-            let screenPosition = CGPoint(x: 0.5, y: 0.5) // 画面中央の位置（正規化座標系）
-            let cameraTransform = camera.transform
-
-            // 画面上の位置をAR空間の位置に変換する
-            guard let worldPosition = camera.unprojectPoint(screenPosition, ontoPlane: cameraTransform, orientation: .portrait, viewportSize: view.bounds.size) else {return}
-
-            // 平面の位置を計算する
-            let translation = simd_float3(worldPosition.x, worldPosition.y, worldPosition.z)
-
-            // 平面の回転はカメラに平行なので、回転行列は単位行列となる
-            let rotation = simd_float4x4(diagonal: simd_float4(1.0, 1.0, 1.0, 1.0))
-
-            // 平面の姿勢行列を組み立てる
-            let planeTransform = simd_mul(simd_float4x4(translation: translation), rotation)
-//            print(planeTransform)
-            // planeTransformを使用して必要な処理を行う
-            // ...
-        
-        
     }
     
     func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
