@@ -15,27 +15,12 @@ extension ViewController {
     func setupAR() {
         sceneView.scene.rootNode.addChildNode(baseNode)
         baseNode.addChildNode(TLNode)
-        baseNode.addChildNode(TRNode)
-        baseNode.addChildNode(BLNode)
-        baseNode.addChildNode(BRNode)
-        baseNode.addChildNode(LCNode)
-        baseNode.addChildNode(RCNode)
-        baseNode.addChildNode(BCNode)
-        baseNode.addChildNode(TCNode)
         baseNode.addChildNode(bgNode)
 
     }
     
     
     func getPointOnSurface(cgPoint: CGPoint) -> simd_float3? {
-        // let hitTestResults = sceneView.hitTest(cgPoint, types:[.existingPlaneUsingGeometry])
-        // guard let result = hitTestResults.first else { return nil }
-        // let worldCoordinates = simd_float3(
-        //     x: result.worldTransform.columns.3.x,
-        //     y: result.worldTransform.columns.3.y,
-        //     z: result.worldTransform.columns.3.z
-        // )
-        // return worldCoordinates
 
         let raycastQuery = sceneView.raycastQuery(from: cgPoint, allowing: .estimatedPlane, alignment: .any)
         if let unwrappedRaycastQuery = raycastQuery {
