@@ -24,6 +24,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
     let ciContext = CIContext()
 
     var distanceFromDeviceLabel = UILabel()
+    var modeButton = UIButton()
     var recBotton = UIButton()
     
     var recording = false
@@ -41,6 +42,14 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
     }()
 
     var hitObjectDistanceFromCamera:Float?
+    
+    var raycastMode:mode = .estimatedPlane
+    enum mode {
+        case estimatedPlane
+        case estimatedPlaneGeometry
+        case estimatedPlaneInfinite
+        case hitTest
+    }
 
     // MARK: - View Life Cycle
     override func viewDidLoad() {
@@ -78,10 +87,20 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
         distanceFromDeviceLabel.textAlignment = .center
         distanceFromDeviceLabel.text = "distance"
         
+
+
+        
         view.addSubview(recBotton)
         recBotton.frame = CGRect(x: view.bounds.maxX - 200, y: 20, width: 200, height: 100)
         recBotton.setTitle("録画", for: .normal)
         recBotton.addTarget(self, action: #selector(recordVideo), for: .touchUpInside)
+
+        view.addSubview(modeButton)
+        modeButton.frame = CGRect(x: view.bounds.maxX - 400, y: recBotton.frame.maxY, width: 400, height: 100)
+        modeButton.setTitle("estimatedPlane", for: .normal)
+        modeButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
+        recBotton.addTarget(self, action: #selector(recordVideo), for: .touchUpInside)
+
         self.recorder = SceneRecorder(setting: SceneRecorder.SceneRecorderSetting(fps: 60, videoSize: self.sceneView.snapshot().size, watermark: nil, scene: self.sceneView))
 
     }
@@ -91,6 +110,23 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
 
         // Pause the view's AR session.
         sceneView.session.pause()
+    }
+    
+    @objc func modeChange() {
+        switch raycastMode {
+        case .estimatedPlane:
+            self.raycastMode = .estimatedPlaneGeometry
+            modeButton.setTitle("estimatedPlaneGeometry", for: .normal)
+        case .estimatedPlaneGeometry:
+            self.raycastMode = .estimatedPlaneInfinite
+            modeButton.setTitle("estimatedPlaneInfinite", for: .normal)
+        case .estimatedPlaneInfinite:
+            self.raycastMode = .hitTest
+            modeButton.setTitle("hitTest", for: .normal)
+        case .hitTest:
+            self.raycastMode = .estimatedPlane
+            modeButton.setTitle("estimatedPlane", for: .normal)
+        }
     }
     
     @objc func recordVideo() {

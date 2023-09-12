@@ -20,8 +20,16 @@ extension ViewController {
     
     
     func getPointOnSurface(cgPoint: CGPoint) -> simd_float3? {
+        var ray: ARRaycastQuery.Target = .estimatedPlane
+        switch raycastMode {
+        case .estimatedPlane: ray = .estimatedPlane
+        case .estimatedPlaneGeometry: ray = .estimatedPlaneGeometry
+        case .estimatedPlaneInfinite: ray = .estimatedPlaneInfinite
+        case .hitTest: ray = .estimatedPlane
 
-        let raycastQuery = sceneView.raycastQuery(from: cgPoint, allowing: .estimatedPlane, alignment: .any)
+        }
+
+        let raycastQuery = sceneView.raycastQuery(from: cgPoint, allowing: ray, alignment: .any)
         if let unwrappedRaycastQuery = raycastQuery {
             let raycastResults = sceneView.session.raycast(unwrappedRaycastQuery)
             guard let result = raycastResults.first else { return nil }
