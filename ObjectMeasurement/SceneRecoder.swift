@@ -7,7 +7,7 @@
 
 import ARKit
 import Foundation
-
+import VideoToolbox
 
 protocol SceneRecorderDelegate: NSObjectProtocol {
     func sceneRecorder(_ recorder: SceneRecorder, didFailFor error: Error)
@@ -109,6 +109,15 @@ class SceneRecorder {
 
     private func setupVideoRecording() {
         let videoSize = setting.videoSize
+        guard let pixelBuffer = setting.scene.session.currentFrame?.capturedImage else {
+            fatalError()
+        }
+            
+           
+        let width = CVPixelBufferGetWidth(pixelBuffer)
+            
+           
+        let height = CVPixelBufferGetHeight(pixelBuffer)
 
         // AVAssetWriterInput
         let settings: [String: Any] = [
@@ -142,7 +151,7 @@ class SceneRecorder {
     // MARK: - Record
 
     private func recordVideo(from adaptor: AVAssetWriterInputPixelBufferAdaptor, assetWriterInput: AVAssetWriterInput, assetWriter: AVAssetWriter, setting: SceneRecorderSetting) {
-
+        guard let startTime = setting.scene.session.currentFrame?.timestamp else { fatalError() }
         let intervalDuration = CFTimeInterval(1.0 / Double(setting.fps))
         let timescale: Float = 600
         let frameDuration = CMTimeMake(
@@ -157,28 +166,46 @@ class SceneRecorder {
             guard !self.isRendering else {return}
             let snapshotTime = CFTimeInterval(intervalDuration * CFTimeInterval(frameNumber))
             if assetWriterInput.isReadyForMoreMediaData, let pool = adaptor.pixelBufferPool, Date().timeIntervalSince1970 > snapshotTime {
-
-                guard let croppedCGImage = setting.scene.snapshot().cgImage?.cropping(to: CGRect(origin: .zero, size: setting.videoSize)) else {
-                    return
-                }
+                guard let frame = self.setting.scene.session.currentFrame else {return}
+                let pixelBuffer = frame.capturedImage
+                
+                let time = CMTimeMakeWithSeconds(frame.timestamp-startTime, preferredTimescale: Int32(60))
+//                guard let croppedCGImage = setting.scene.snapshot().cgImage?.cropping(to: CGRect(origin: .zero, size: setting.videoSize)) else {
+//                    return
+//                }
                 // Watermark
-                let image: UIImage
-                if let watermark = setting.watermark {
-                    image = SceneRecorder.drawWatermark(watermark, on: UIImage(cgImage: croppedCGImage))
-                } else {
-                    image = UIImage(cgImage: croppedCGImage)
-                }
+//                let image: UIImage
+//                if let watermark = setting.watermark {
+//                    image = SceneRecorder.drawWatermark(watermark, on: UIImage(cgImage: croppedCGImage))
+//                } else {
+//                    image = UIImage(cgImage: croppedCGImage)
+//                }
 
                 let presentationTime = CMTimeMultiply(frameDuration, multiplier:  Int32(frameNumber))
-                let pixelBuffer = SceneRecorder.pixelBuffer(withSize: setting.videoSize, fromImage: image, usingBufferPool: pool)
-                adaptor.append(pixelBuffer, withPresentationTime: presentationTime)
+                let image = self.convertCVPixelBufferToCGImage(pixelBuffer)
+                let rotated = SceneRecorder.pixelBuffer(withSize: setting.videoSize, fromImage: image!, usingBufferPool: pool)
+//                let pixelBuffer = SceneRecorder.pixelBuffer(withSize: setting.videoSize, fromImage: image, usingBufferPool: pool)
+                adaptor.append(rotated, withPresentationTime: presentationTime)
                 frameNumber += 1
             } else {
                 print("WRONG")
             }
         }
     }
+    
+    func convertCVPixelBufferToCGImage(_ pixelBuffer: CVPixelBuffer) -> CGImage? {
+        let width = CVPixelBufferGetWidth(pixelBuffer)
+        let height = CVPixelBufferGetHeight(pixelBuffer)
+        let image = CIImage(cvPixelBuffer: pixelBuffer).oriented(.right)
+        let cgImage = context.createCGImage(image, from: image.extent)
+//        var cgImage: CGImage?
+//        VTCreateCGImageFromCVPixelBuffer(pixelBuffer, options: nil, imageOut: &cgImage)
+        
+        return cgImage
+    }
 
+
+    let context = CIContext()
     // MARK: - Merge
 
     private func mergeVideoAndAudio(videoUrl: URL, audioUrl: URL, setting: SceneRecorderSetting, completion: @escaping (URL) -> Void) {
@@ -234,7 +261,7 @@ class SceneRecorder {
 
     // MARK: - Class Function
 
-    private class func pixelBuffer(withSize size: CGSize, fromImage image: UIImage, usingBufferPool pool: CVPixelBufferPool) -> CVPixelBuffer {
+    private class func pixelBuffer(withSize size: CGSize, fromImage image: CGImage, usingBufferPool pool: CVPixelBufferPool) -> CVPixelBuffer {
 
         var pixelBufferOut: CVPixelBuffer?
 
@@ -255,7 +282,7 @@ class SceneRecorder {
             bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue
         )
         context?.clear(CGRect(x: 0, y: 0, width: size.width, height: size.height))
-        context?.draw(image.cgImage!, in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
+        context?.draw(image, in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
 
         CVPixelBufferUnlockBaseAddress(pixelBuffer, CVPixelBufferLockFlags.readOnly)
 
@@ -279,5 +306,31 @@ class SceneRecorder {
             return image
         }
         return result
+    }
+    
+    
+
+    func rotatePixelBuffer(_ pixelBuffer: CVPixelBuffer) -> CVPixelBuffer? {
+        let image = CIImage(cvPixelBuffer: pixelBuffer)
+        
+        // 90度回転するアフィン変換を設定
+        let rotationTransform = CGAffineTransform(rotationAngle: .pi / 2.0)
+        let outputImage = image.transformed(by: rotationTransform)
+        
+        // 回転後の画像を新しいピクセルバッファに書き込む
+        var newPixelBuffer: CVPixelBuffer?
+        let attrs = [
+            kCVPixelBufferCGImageCompatibilityKey: kCFBooleanTrue,
+            kCVPixelBufferCGBitmapContextCompatibilityKey: kCFBooleanTrue
+        ] as CFDictionary
+        let status = CVPixelBufferCreate(nil, Int(outputImage.extent.width), Int(outputImage.extent.height), kCVPixelFormatType_32ARGB, attrs, &newPixelBuffer)
+        
+        if status == kCVReturnSuccess {
+            let ciContext = CIContext()
+            ciContext.render(outputImage, to: newPixelBuffer!)
+            return newPixelBuffer
+        }
+        
+        return nil
     }
 }

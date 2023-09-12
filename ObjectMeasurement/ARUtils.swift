@@ -15,7 +15,6 @@ extension ViewController {
     func setupAR() {
         sceneView.scene.rootNode.addChildNode(baseNode)
         baseNode.addChildNode(TLNode)
-        baseNode.addChildNode(bgNode)
 
     }
     

@@ -14,8 +14,8 @@
             filePath = "ObjectMeasurement/SceneRecoder.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "161"
-            endingLineNumber = "161"
+            startingLineNumber = "173"
+            endingLineNumber = "173"
             landmarkName = "recordVideo(from:assetWriterInput:assetWriter:setting:)"
             landmarkType = "7">
             <Locations>
@@ -62,10 +62,10 @@
             filePath = "ObjectMeasurement/SceneRecoder.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "184"
-            endingLineNumber = "184"
-            landmarkName = "mergeVideoAndAudio(videoUrl:audioUrl:setting:completion:)"
-            landmarkType = "7">
+            startingLineNumber = "211"
+            endingLineNumber = "211"
+            landmarkName = "SceneRecorder"
+            landmarkType = "3">
             <Locations>
                <Location
                   uuid = "FEC321C2-1606-4411-AF0A-22067B2120C3 - 58f31ca38bda704d"
@@ -110,8 +110,8 @@
             filePath = "ObjectMeasurement/SceneRecoder.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "165"
-            endingLineNumber = "165"
+            startingLineNumber = "177"
+            endingLineNumber = "177"
             landmarkName = "recordVideo(from:assetWriterInput:assetWriter:setting:)"
             landmarkType = "7">
             <Locations>
@@ -158,8 +158,8 @@
             filePath = "ObjectMeasurement/SceneRecoder.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "175"
-            endingLineNumber = "175"
+            startingLineNumber = "189"
+            endingLineNumber = "189"
             landmarkName = "recordVideo(from:assetWriterInput:assetWriter:setting:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -465,6 +465,70 @@
             endingLineNumber = "55"
             landmarkName = "SceneRecorder"
             landmarkType = "3">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "18368DC5-03C0-4F70-A7AA-8DFF96413D88"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ObjectMeasurement/ViewController.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "57"
+            endingLineNumber = "57"
+            landmarkName = "viewDidAppear(_:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "8EF6BD93-3995-4B73-AF7D-06CE4D742299"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ObjectMeasurement/SceneRecoder.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "334"
+            endingLineNumber = "334"
+            landmarkName = "rotatePixelBuffer(_:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "8EF6BD93-3995-4B73-AF7D-06CE4D742299 - cdfb231d2cc927cd"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ObjectMeasurement.SceneRecorder.rotatePixelBuffer(__C.CVBufferRef) -&gt; Swift.Optional&lt;__C.CVBufferRef&gt;"
+                  moduleName = "ObjectMeasurement"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/majimadaisuke/Downloads/ObjectMeasurement/ObjectMeasurement/SceneRecoder.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "334"
+                  endingLineNumber = "334"
+                  offsetFromSymbolStart = "1252">
+               </Location>
+               <Location
+                  uuid = "8EF6BD93-3995-4B73-AF7D-06CE4D742299 - cdfb231d2cc927cd"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "ObjectMeasurement.SceneRecorder.rotatePixelBuffer(__C.CVBufferRef) -&gt; Swift.Optional&lt;__C.CVBufferRef&gt;"
+                  moduleName = "ObjectMeasurement"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/majimadaisuke/Downloads/ObjectMeasurement/ObjectMeasurement/SceneRecoder.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "334"
+                  endingLineNumber = "334"
+                  offsetFromSymbolStart = "1204">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

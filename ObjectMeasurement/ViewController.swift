@@ -40,39 +40,38 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
         return node
     }()
 
-    var bgNode: SCNNode = {
-        let node = SCNNode(geometry: SCNPlane(width: 100, height: 100))
-        node.worldPosition = SCNVector3(x: 0, y: 10, z: 0)
-        node.geometry?.materials.first?.diffuse.contents = UIColor.orange.withAlphaComponent(0.3)
-        return node
-    }()
-    
     var hitObjectDistanceFromCamera:Float?
-    
-    var plane:SCNNode?
-
 
     // MARK: - View Life Cycle
-
+    override func viewDidLoad() {
+        super.viewDidLoad()
+    }
     /// - Tag: StartARSession
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
         setupAR()
         let configuration = ARWorldTrackingConfiguration()
-        configuration.planeDetection = [.vertical]
+        if #available(iOS 16.0, *) {
+            if let hiResFormat = ARWorldTrackingConfiguration.recommendedVideoFormatFor4KResolution {
+//                configuration.videoFormat = hiResFormat
+            }
+        } else {
+            // Fallback on earlier versions
+        }
+        configuration.planeDetection = [.vertical,.horizontal]
         sceneView.session.run(configuration)
 
         sceneView.session.delegate = self
         UIApplication.shared.isIdleTimerDisabled = true
-//        coachingOverlay.goal = .verticalPlane
-//        coachingOverlay.activatesAutomatically = true
-//        coachingOverlay.session = sceneView.session
-//        coachingOverlay.delegate = self
+        coachingOverlay.goal = .verticalPlane
+        coachingOverlay.activatesAutomatically = true
+        coachingOverlay.session = sceneView.session
+        coachingOverlay.delegate = self
 //
 //        // Viewとして扱う
-//        coachingOverlay.frame = sceneView.bounds
-//        sceneView.addSubview(coachingOverlay)
+        coachingOverlay.frame = sceneView.bounds
+        sceneView.addSubview(coachingOverlay)
         view.addSubview(distanceFromDeviceLabel)
         distanceFromDeviceLabel.frame = CGRect(x: 0, y: view.bounds.maxY - 300, width: view.bounds.width, height: 300)
         distanceFromDeviceLabel.numberOfLines = 2
@@ -83,6 +82,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
         recBotton.frame = CGRect(x: view.bounds.maxX - 200, y: 20, width: 200, height: 100)
         recBotton.setTitle("録画", for: .normal)
         recBotton.addTarget(self, action: #selector(recordVideo), for: .touchUpInside)
+        self.recorder = SceneRecorder(setting: SceneRecorder.SceneRecorderSetting(fps: 60, videoSize: self.sceneView.snapshot().size, watermark: nil, scene: self.sceneView))
 
     }
     
@@ -97,14 +97,23 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
         if !recording {
             recording = true
             recBotton.setTitle("停止", for: .normal)
-            recorder = SceneRecorder(setting: SceneRecorder.SceneRecorderSetting(fps: 10, videoSize: sceneView.bounds.size, watermark: nil, scene: sceneView))
-            recorder!.start()
+            self.recorder!.start()
+        
         } else {
+            recording = false
             recBotton.setTitle("録画", for: .normal)
             recorder!.stop { url in
                 self.saveVideoToPhotoLibrary(at: url) { success, error in
                     if success {
                         print("Video saved to photo library successfully!")
+                        DispatchQueue.main.async {
+                            let alert = UIAlertController(title: "保存しました", message: "", preferredStyle: .actionSheet)
+                            let ok = UIAlertAction(title:"ok", style: .default) { action in
+                                alert.dismiss(animated: true)
+                            }
+                            alert.addAction(ok)
+                            self.present(alert, animated: true)
+                        }
                     } else {
                         print("Error saving video to photo library: \(error?.localizedDescription ?? "Unknown error")")
                     }
@@ -127,26 +136,11 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
             }
         }
     }
-
-    // MARK: - ARSCNViewDelegate
-    
-    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
-        guard let hitObjectDistanceFromCamera = hitObjectDistanceFromCamera else {
-            bgNode.isHidden = true
-            return
-        }
-        bgNode.isHidden = true
-        let position = SCNVector3(x: 0, y: 0, z: hitObjectDistanceFromCamera) // ノードの位置は、左右：0m 上下：0m　奥に50cm
-        if let camera = sceneView.pointOfView {
-            bgNode.position = camera.convertPosition(position, to: nil) // カメラ位置からの偏差で求めた位置
-            bgNode.eulerAngles = camera.eulerAngles  // カメラのオイラー角と同じにする
-        }
-
-    }
     
     // MARK: - ARSessionDelegate
-
+    
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
+        print(frame.timestamp)
         let roll = round(frame.camera.eulerAngles.y * 180 / .pi * 100) / 100
         
 //        let pixelBuffer = frame.capturedImage
@@ -173,6 +167,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
         screenPos.y = Float(view.center.y)
         TLNode.isHidden = false
         TLNode.worldPosition = sceneView.unprojectPoint(screenPos)
+        
     }
     
     func session(_ session: ARSession, didAdd anchors: [ARAnchor]) {
@@ -282,10 +277,4 @@ extension CIImage {
         let transform = CGAffineTransform(scaleX: size.width / selfSize.width, y: size.height / selfSize.height)
         return transformed(by: transform)
     }
-}
-struct Detection {
-    let box:CGRect
-    let confidence:Float
-    let label:String?
-    let color:UIColor
 }
