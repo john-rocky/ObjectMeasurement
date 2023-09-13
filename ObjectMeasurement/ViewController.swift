@@ -43,11 +43,12 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
 
     var hitObjectDistanceFromCamera:Float?
     
-    var raycastMode:mode = .estimatedPlane
+    var raycastMode:mode = .sceneDepth
     enum mode {
+        case sceneDepth
         case estimatedPlane
-        case estimatedPlaneGeometry
-        case estimatedPlaneInfinite
+        case existingPlaneGeometry
+        case existingPlaneInfinite
         case hitTest
     }
 
@@ -61,6 +62,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
 
         setupAR()
         let configuration = ARWorldTrackingConfiguration()
+        configuration.frameSemantics = .smoothedSceneDepth
+
         if #available(iOS 16.0, *) {
             if let hiResFormat = ARWorldTrackingConfiguration.recommendedVideoFormatFor4KResolution {
 //                configuration.videoFormat = hiResFormat
@@ -77,7 +80,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
         coachingOverlay.activatesAutomatically = true
         coachingOverlay.session = sceneView.session
         coachingOverlay.delegate = self
-//
+///Users/majimadaisuke/Downloads
 //        // Viewとして扱う
         coachingOverlay.frame = sceneView.bounds
         sceneView.addSubview(coachingOverlay)
@@ -87,8 +90,6 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
         distanceFromDeviceLabel.textAlignment = .center
         distanceFromDeviceLabel.text = "distance"
         
-
-
         
         view.addSubview(recBotton)
         recBotton.frame = CGRect(x: view.bounds.maxX - 200, y: 20, width: 200, height: 100)
@@ -96,10 +97,10 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
         recBotton.addTarget(self, action: #selector(recordVideo), for: .touchUpInside)
 
         view.addSubview(modeButton)
-        modeButton.frame = CGRect(x: view.bounds.maxX - 400, y: recBotton.frame.maxY, width: 400, height: 100)
-        modeButton.setTitle("estimatedPlane", for: .normal)
+        modeButton.frame = CGRect(x: view.bounds.maxX - 400, y: distanceFromDeviceLabel.frame.minY-100, width: 400, height: 100)
+        modeButton.setTitle("sceneDepth", for: .normal)
         modeButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
-        recBotton.addTarget(self, action: #selector(recordVideo), for: .touchUpInside)
+        modeButton.addTarget(self, action: #selector(modeChange), for: .touchUpInside)
 
         self.recorder = SceneRecorder(setting: SceneRecorder.SceneRecorderSetting(fps: 60, videoSize: self.sceneView.snapshot().size, watermark: nil, scene: self.sceneView))
 
@@ -114,18 +115,21 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
     
     @objc func modeChange() {
         switch raycastMode {
+        case .sceneDepth:
+            self.raycastMode = .estimatedPlane
+            modeButton.setTitle("estimatedPlane", for: .normal)
         case .estimatedPlane:
-            self.raycastMode = .estimatedPlaneGeometry
-            modeButton.setTitle("estimatedPlaneGeometry", for: .normal)
-        case .estimatedPlaneGeometry:
-            self.raycastMode = .estimatedPlaneInfinite
-            modeButton.setTitle("estimatedPlaneInfinite", for: .normal)
-        case .estimatedPlaneInfinite:
+            self.raycastMode = .existingPlaneGeometry
+            modeButton.setTitle("existingPlaneGeometry", for: .normal)
+        case .existingPlaneGeometry:
+            self.raycastMode = .existingPlaneInfinite
+            modeButton.setTitle("existingPlaneInfinite", for: .normal)
+        case .existingPlaneInfinite:
             self.raycastMode = .hitTest
             modeButton.setTitle("hitTest", for: .normal)
         case .hitTest:
-            self.raycastMode = .estimatedPlane
-            modeButton.setTitle("estimatedPlane", for: .normal)
+            self.raycastMode = .sceneDepth
+            modeButton.setTitle("sceneDepth", for: .normal)
         }
     }
     
@@ -176,21 +180,59 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
     // MARK: - ARSessionDelegate
     
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
-        print(frame.timestamp)
         let roll = round(frame.camera.eulerAngles.y * 180 / .pi * 100) / 100
-        
-//        let pixelBuffer = frame.capturedImage
-        guard let surfaceCenter = getPointOnSurface(cgPoint: view.center) else {
-            hitObjectDistanceFromCamera = nil
-            return
+        var distanceToSurface:Float = 0
+        var distText = "No data."
+        if raycastMode == .sceneDepth {
+            
+            guard let sceneDepth = frame.smoothedSceneDepth ?? frame.sceneDepth else {
+                print("Failed to acquire scene depth.")
+                return
+            }
+            var pixelBuffer: CVPixelBuffer!
+            pixelBuffer = sceneDepth.depthMap
+            let width = CVPixelBufferGetWidth(pixelBuffer)
+            let height = CVPixelBufferGetHeight(pixelBuffer)
+            
+            // 中央の座標を計算する
+            let centerX = width / 2
+            let centerY = height / 2
+            CVPixelBufferLockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
+            let baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer)?.assumingMemoryBound(to: Float32.self)
+            
+            // Calculate the index for the specified pixel
+            let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
+            let pixelIndex = Int(centerY) * bytesPerRow / MemoryLayout<Float32>.stride + Int(centerX)
+            
+            // Access the depth value at the specified pixel
+            let depthValue = baseAddress?[pixelIndex]
+            
+            // Unlock the pixel buffer
+            CVPixelBufferUnlockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
+            
+            if let depthValue = depthValue {
+                // Convert the depth value to distance in meters using scaling factor
+                let scalingFactor = 0.01
+                let distanceInMeters = Double(depthValue)
+                distanceToSurface = Float(distanceInMeters)
+                // Now 'distanceInMeters' contains the distance in meters at the specified pixel.
+            }
+        } else {
+            
+            //        let pixelBuffer = frame.capturedImage
+            guard let surfaceCenter = getPointOnSurface(cgPoint: view.center) else {
+                hitObjectDistanceFromCamera = nil
+                return
+            }
+            let transform = frame.camera.transform.columns.3
+            let devicePosition = simd_float3(x: transform.x, y: transform.y, z: transform.z)
+            distanceToSurface = distance(devicePosition,surfaceCenter)
+            
         }
-        let transform = frame.camera.transform.columns.3
-        let devicePosition = simd_float3(x: transform.x, y: transform.y, z: transform.z)
-        let distanceToSurface = distance(devicePosition,surfaceCenter)
-        hitObjectDistanceFromCamera = -distanceToSurface
+        distText = "距離: \(round(distanceToSurface*10000)/100) cm\n角度 \(roll)°"
         DispatchQueue.main.async {
             self.distanceFromDeviceLabel.isHidden = false
-            self.distanceFromDeviceLabel.text = "距離: \(round(distanceToSurface*10000)/100) cm\n角度 \(roll)°"
+            self.distanceFromDeviceLabel.text = distText
         }
 
         let infrontOfCamera = SCNVector3(x: 0, y: 0, z: -distanceToSurface)
