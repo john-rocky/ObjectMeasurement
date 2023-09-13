@@ -83,20 +83,20 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
 ///Users/majimadaisuke/Downloads
 //        // Viewとして扱う
         coachingOverlay.frame = sceneView.bounds
-        sceneView.addSubview(coachingOverlay)
+//        sceneView.addSubview(coachingOverlay)
         view.addSubview(distanceFromDeviceLabel)
         distanceFromDeviceLabel.frame = CGRect(x: 0, y: view.bounds.maxY - 300, width: view.bounds.width, height: 300)
         distanceFromDeviceLabel.numberOfLines = 2
         distanceFromDeviceLabel.textAlignment = .center
-        distanceFromDeviceLabel.text = "distance"
+//        distanceFromDeviceLabel.text = "distance"
         
         
-        view.addSubview(recBotton)
+//        view.addSubview(recBotton)
         recBotton.frame = CGRect(x: view.bounds.maxX - 200, y: 20, width: 200, height: 100)
         recBotton.setTitle("録画", for: .normal)
         recBotton.addTarget(self, action: #selector(recordVideo), for: .touchUpInside)
 
-        view.addSubview(modeButton)
+//        view.addSubview(modeButton)
         modeButton.frame = CGRect(x: view.bounds.maxX - 400, y: distanceFromDeviceLabel.frame.minY-100, width: 400, height: 100)
         modeButton.setTitle("sceneDepth", for: .normal)
         modeButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
@@ -180,6 +180,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
     // MARK: - ARSessionDelegate
     
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
+        let image = CIImage(cvPixelBuffer: frame.capturedImage).oriented(.right)
         let roll = round(frame.camera.eulerAngles.y * 180 / .pi * 100) / 100
         var distanceToSurface:Float = 0
         var distText = "No data."
@@ -191,6 +192,8 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
             }
             var pixelBuffer: CVPixelBuffer!
             pixelBuffer = sceneDepth.depthMap
+            let ciImage = CIImage(cvPixelBuffer: pixelBuffer).oriented(.right)
+            
             let width = CVPixelBufferGetWidth(pixelBuffer)
             let height = CVPixelBufferGetHeight(pixelBuffer)
             
@@ -229,22 +232,22 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
             distanceToSurface = distance(devicePosition,surfaceCenter)
             
         }
-        distText = "距離: \(round(distanceToSurface*10000)/100) cm\n角度 \(roll)°"
-        DispatchQueue.main.async {
-            self.distanceFromDeviceLabel.isHidden = false
-            self.distanceFromDeviceLabel.text = distText
-        }
-
-        let infrontOfCamera = SCNVector3(x: 0, y: 0, z: -distanceToSurface)
-        guard let cameraNode = sceneView.pointOfView else { return }
-        let pointInWorld = cameraNode.convertPosition(infrontOfCamera, to: nil)
-
-        var screenPos = sceneView.projectPoint(pointInWorld)
-
-        screenPos.x = Float(view.center.x)
-        screenPos.y = Float(view.center.y)
-        TLNode.isHidden = false
-        TLNode.worldPosition = sceneView.unprojectPoint(screenPos)
+//        distText = "距離: \(round(distanceToSurface*10000)/100) cm\n角度 \(roll)°"
+//        DispatchQueue.main.async {
+//            self.distanceFromDeviceLabel.isHidden = false
+//            self.distanceFromDeviceLabel.text = distText
+//        }
+//
+//        let infrontOfCamera = SCNVector3(x: 0, y: 0, z: -distanceToSurface)
+//        guard let cameraNode = sceneView.pointOfView else { return }
+//        let pointInWorld = cameraNode.convertPosition(infrontOfCamera, to: nil)
+//
+//        var screenPos = sceneView.projectPoint(pointInWorld)
+//
+//        screenPos.x = Float(view.center.x)
+//        screenPos.y = Float(view.center.y)
+//        TLNode.isHidden = false
+//        TLNode.worldPosition = sceneView.unprojectPoint(screenPos)
         
     }
     
