@@ -422,22 +422,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "18368DC5-03C0-4F70-A7AA-8DFF96413D88"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "ObjectMeasurement/ViewController.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "70"
-            endingLineNumber = "70"
-            landmarkName = "viewDidAppear(_:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "8EF6BD93-3995-4B73-AF7D-06CE4D742299"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
@@ -454,134 +438,6 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "0116124C-9C6C-413A-B10E-7A5F052A7476"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "ObjectMeasurement/ViewController.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "246"
-            endingLineNumber = "246"
-            landmarkName = "session(_:didUpdate:)"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "0116124C-9C6C-413A-B10E-7A5F052A7476 - f1a591bb7154497b"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "ObjectMeasurement.ViewController.session(_: __C.ARSession, didUpdate: __C.ARFrame) -&gt; ()"
-                  moduleName = "ObjectMeasurement"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/majimadaisuke/Downloads/ObjectMeasurement/ObjectMeasurement/ViewController.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "220"
-                  endingLineNumber = "220"
-                  offsetFromSymbolStart = "3752">
-               </Location>
-               <Location
-                  uuid = "0116124C-9C6C-413A-B10E-7A5F052A7476 - f1a591bb7154497b"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "ObjectMeasurement.ViewController.session(_: __C.ARSession, didUpdate: __C.ARFrame) -&gt; ()"
-                  moduleName = "ObjectMeasurement"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/majimadaisuke/Downloads/ObjectMeasurement/ObjectMeasurement/ViewController.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "220"
-                  endingLineNumber = "220"
-                  offsetFromSymbolStart = "3748">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "0A4ABA95-43C0-4686-A6FB-CFD300B8FF30"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "ObjectMeasurement/ViewController.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "223"
-            endingLineNumber = "223"
-            landmarkName = "session(_:didUpdate:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "E6397B48-89D3-462E-ABE1-65ADEDBB1A3D"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "ObjectMeasurement/ViewController.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "226"
-            endingLineNumber = "226"
-            landmarkName = "session(_:didUpdate:)"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "E6397B48-89D3-462E-ABE1-65ADEDBB1A3D - f1a591bb715444f6"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "ObjectMeasurement.ViewController.session(_: __C.ARSession, didUpdate: __C.ARFrame) -&gt; ()"
-                  moduleName = "ObjectMeasurement"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/majimadaisuke/Downloads/ObjectMeasurement/ObjectMeasurement/ViewController.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "201"
-                  endingLineNumber = "201"
-                  offsetFromSymbolStart = "2144">
-               </Location>
-               <Location
-                  uuid = "E6397B48-89D3-462E-ABE1-65ADEDBB1A3D - f1a591bb715444d7"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "ObjectMeasurement.ViewController.session(_: __C.ARSession, didUpdate: __C.ARFrame) -&gt; ()"
-                  moduleName = "ObjectMeasurement"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/majimadaisuke/Downloads/ObjectMeasurement/ObjectMeasurement/ViewController.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "200"
-                  endingLineNumber = "200"
-                  offsetFromSymbolStart = "2608">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "FBCF74A7-9748-4E5C-9F8B-313EE1311EE5"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "ObjectMeasurement/ViewController.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "224"
-            endingLineNumber = "224"
-            landmarkName = "session(_:didUpdate:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
             uuid = "2460389D-FC45-4A36-BCF4-5EE3BE47D067"
             shouldBeEnabled = "No"
             ignoreCount = "0"
@@ -589,8 +445,8 @@
             filePath = "ObjectMeasurement/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "209"
-            endingLineNumber = "209"
+            startingLineNumber = "64"
+            endingLineNumber = "64"
             landmarkName = "session(_:didUpdate:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -598,16 +454,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "B587D48C-C275-4D4B-AB79-260B9A683AC9"
+            uuid = "6A100B5C-5A25-4595-B554-9F438FD6BFAB"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ObjectMeasurement/ViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "144"
-            endingLineNumber = "144"
-            landmarkName = "shootPhoto()"
+            startingLineNumber = "67"
+            endingLineNumber = "67"
+            landmarkName = "session(_:didUpdate:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
