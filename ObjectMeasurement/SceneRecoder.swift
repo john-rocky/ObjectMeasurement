@@ -151,7 +151,6 @@ class SceneRecorder {
     // MARK: - Record
 
     private func recordVideo(from adaptor: AVAssetWriterInputPixelBufferAdaptor, assetWriterInput: AVAssetWriterInput, assetWriter: AVAssetWriter, setting: SceneRecorderSetting) {
-        guard let startTime = setting.scene.session.currentFrame?.timestamp else { fatalError() }
         let intervalDuration = CFTimeInterval(1.0 / Double(setting.fps))
         let timescale: Float = 600
         let frameDuration = CMTimeMake(
@@ -161,15 +160,19 @@ class SceneRecorder {
         var frameNumber = 0
         assetWriter.startWriting()
         assetWriter.startSession(atSourceTime: .zero)
-
+        var startTime:TimeInterval = 0
         assetWriterInput.requestMediaDataWhenReady(on: frameQueue) {
+            if startTime == 0 {
+                guard let start = setting.scene.session.currentFrame?.timestamp else { fatalError() }
+                startTime = start
+            }
             guard !self.isRendering else {return}
             let snapshotTime = CFTimeInterval(intervalDuration * CFTimeInterval(frameNumber))
             if assetWriterInput.isReadyForMoreMediaData, let pool = adaptor.pixelBufferPool, Date().timeIntervalSince1970 > snapshotTime {
                 guard let frame = self.setting.scene.session.currentFrame else {return}
                 let pixelBuffer = frame.capturedImage
                 
-                let time = CMTimeMakeWithSeconds(frame.timestamp-startTime, preferredTimescale: Int32(60))
+                let time = CMTime(seconds: frame.timestamp-startTime, preferredTimescale: Int32(60))
 //                guard let croppedCGImage = setting.scene.snapshot().cgImage?.cropping(to: CGRect(origin: .zero, size: setting.videoSize)) else {
 //                    return
 //                }
@@ -180,12 +183,12 @@ class SceneRecorder {
 //                } else {
 //                    image = UIImage(cgImage: croppedCGImage)
 //                }
-
+                print(time)
                 let presentationTime = CMTimeMultiply(frameDuration, multiplier:  Int32(frameNumber))
                 let image = self.convertCVPixelBufferToCGImage(pixelBuffer)
                 let rotated = SceneRecorder.pixelBuffer(withSize: setting.videoSize, fromImage: image!, usingBufferPool: pool)
 //                let pixelBuffer = SceneRecorder.pixelBuffer(withSize: setting.videoSize, fromImage: image, usingBufferPool: pool)
-                adaptor.append(rotated, withPresentationTime: presentationTime)
+                adaptor.append(rotated, withPresentationTime: time)
                 frameNumber += 1
             } else {
                 print("WRONG")

@@ -29,6 +29,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
     
     var recording = false
     var recorder: SceneRecorder?
+    var shooting = false
     
     // Node
     var baseNode = SCNNode()
@@ -66,7 +67,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
 
         if #available(iOS 16.0, *) {
             if let hiResFormat = ARWorldTrackingConfiguration.recommendedVideoFormatFor4KResolution {
-//                configuration.videoFormat = hiResFormat
+                configuration.videoFormat = hiResFormat
             }
         } else {
             // Fallback on earlier versions
@@ -85,16 +86,17 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
         coachingOverlay.frame = sceneView.bounds
         sceneView.addSubview(coachingOverlay)
         view.addSubview(distanceFromDeviceLabel)
-        distanceFromDeviceLabel.frame = CGRect(x: 0, y: view.bounds.maxY - 300, width: view.bounds.width, height: 300)
+        distanceFromDeviceLabel.frame = CGRect(x: 0, y: view.bounds.maxY - 300, width: view.bounds.width, height: 150)
         distanceFromDeviceLabel.numberOfLines = 2
         distanceFromDeviceLabel.textAlignment = .center
         distanceFromDeviceLabel.text = "distance"
-        
+        distanceFromDeviceLabel.font = .systemFont(ofSize: 20, weight: .heavy)
         
         view.addSubview(recBotton)
-        recBotton.frame = CGRect(x: view.bounds.maxX - 200, y: 20, width: 200, height: 100)
-        recBotton.setTitle("録画", for: .normal)
-        recBotton.addTarget(self, action: #selector(recordVideo), for: .touchUpInside)
+        recBotton.frame = CGRect(x: view.center.x - 100, y: distanceFromDeviceLabel.frame.maxY, width: 200, height: 100)
+        recBotton.setTitle("撮影", for: .normal)
+        recBotton.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
+        recBotton.addTarget(self, action: #selector(shootPhoto), for: .touchUpInside)
 
         view.addSubview(modeButton)
         modeButton.frame = CGRect(x: view.bounds.maxX - 400, y: distanceFromDeviceLabel.frame.minY-100, width: 400, height: 100)
@@ -102,7 +104,7 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
         modeButton.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
         modeButton.addTarget(self, action: #selector(modeChange), for: .touchUpInside)
 
-        self.recorder = SceneRecorder(setting: SceneRecorder.SceneRecorderSetting(fps: 60, videoSize: self.sceneView.snapshot().size, watermark: nil, scene: self.sceneView))
+//        self.recorder = SceneRecorder(setting: SceneRecorder.SceneRecorderSetting(fps: 60, videoSize: self.sceneView.snapshot().size, watermark: nil, scene: self.sceneView))
 
     }
     
@@ -130,6 +132,30 @@ class ViewController: UIViewController, ARSCNViewDelegate, ARSessionDelegate, AR
         case .hitTest:
             self.raycastMode = .sceneDepth
             modeButton.setTitle("sceneDepth", for: .normal)
+        }
+    }
+    
+    @objc func shootPhoto() {
+        guard let pixelBuffer = sceneView.session.currentFrame?.capturedImage else {fatalError()}
+              let ciImage = CIImage(cvPixelBuffer: pixelBuffer).oriented(.right)
+        let cgImage = ciContext.createCGImage(ciImage, from: ciImage.extent)
+              let uiImage = UIImage(cgImage: cgImage!)
+        
+        UIImageWriteToSavedPhotosAlbum(uiImage, self, #selector(image(image:didFinishSavingWithError:contextInfo:)), nil)
+    }
+    
+    @objc func image(image: UIImage, didFinishSavingWithError error: NSError?, contextInfo: UnsafeRawPointer) {
+        if let error = error {
+            print("失敗：\(error)")
+        } else {
+            DispatchQueue.main.async {
+                let alert = UIAlertController(title: "「写真」に保存しました", message: "", preferredStyle: .actionSheet)
+                let ok = UIAlertAction(title:"ok", style: .default) { action in
+                    alert.dismiss(animated: true)
+                }
+                alert.addAction(ok)
+                self.present(alert, animated: true)
+            }
         }
     }
     
