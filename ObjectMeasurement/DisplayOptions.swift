@@ -27,8 +27,11 @@ extension ViewController {
         recBotton.addTarget(self, action: #selector(shootPhoto), for: .touchUpInside)
     }
     
-    func updateViews(distanceToObject: Float, roll: Float) {
-        let distText = "距離: \(round(distanceToObject*10000)/100) cm\n角度 \(roll)°"
+    func updateViews(distanceToObject: Float?, roll: Float) {
+        var distText = ""
+        if let distanceToObject = distanceToObject {
+            distText = "距離: \(round(distanceToObject*10000)/100) cm\n角度 \(roll)°"
+        }
         DispatchQueue.main.async {
             self.distanceFromDeviceLabel.isHidden = false
             self.distanceFromDeviceLabel.text = distText

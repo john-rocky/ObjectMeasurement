@@ -46,7 +46,9 @@ class ViewController: UIViewController, ARSessionDelegate {
     
     func setupARSession() {
         let configuration = ARWorldTrackingConfiguration()
-        configuration.frameSemantics = .smoothedSceneDepth
+        if ARWorldTrackingConfiguration.supportsFrameSemantics(.smoothedSceneDepth) {
+            configuration.frameSemantics = .smoothedSceneDepth
+        }
         
         if #available(iOS 16.0, *) {
             if let hiResFormat = ARWorldTrackingConfiguration.recommendedVideoFormatFor4KResolution {
@@ -67,8 +69,8 @@ class ViewController: UIViewController, ARSessionDelegate {
         updateViews(distanceToObject: distanceToObject, roll: roll)
     }
     
-    func getDistance(frame: ARFrame) -> Float {
-        var distanceToSurface:Float = 0
+    func getDistance(frame: ARFrame) -> Float? {
+        var distanceToSurface:Float? = nil
         guard let sceneDepth = frame.smoothedSceneDepth ?? frame.sceneDepth else {
             print("Failed to acquire scene depth.")
             return distanceToSurface
